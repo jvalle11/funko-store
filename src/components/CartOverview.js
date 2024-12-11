@@ -31,7 +31,7 @@ const Cart = () => {
         return;
       }
 
-      const response = await fetch('/.netlify/functions/createCheckoutSession', {
+      const response = await fetch('/.api/functions/createCheckoutSession', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
