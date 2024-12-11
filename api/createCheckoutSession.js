@@ -1,19 +1,17 @@
 const stripe = require('stripe')(process.env.GATSBY_STRIPE_SECRET_KEY);
 
-exports.handler = async function(event, context) {
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', ['POST']);
+    return res.status(405).json({ error: `Method ${req.method} not allowed` });
+  }
+
   let items;
 
   try {
-    items = JSON.parse(event.body).items;
+    items = req.body.items;
   } catch (err) {
-    return {
-      statusCode: 400,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ error: 'Invalid request body' }),
-    };
+    return res.status(400).json({ error: 'Invalid request body' });
   }
 
   try {
@@ -28,22 +26,8 @@ exports.handler = async function(event, context) {
       cancel_url: `${process.env.URL}/cancel`,
     });
 
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ sessionId: session.id }),
-    };
+    return res.status(200).json({ sessionId: session.id });
   } catch (err) {
-    return {
-      statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ error: err.message }),
-    };
+    return res.status(500).json({ error: err.message });
   }
-};
+}
